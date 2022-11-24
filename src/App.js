@@ -1,11 +1,11 @@
-import { gsap, Power0 } from 'gsap';
+import { gsap } from 'gsap';
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef } from 'react';
 import './App.css';
 gsap.registerPlugin(ScrollTrigger);
 
 function App() {
-  
+
   const demoVideo1Info = {
     totalFrames: 440,
     totalTime: 3,
@@ -16,79 +16,53 @@ function App() {
 
   const demoVideo2Info = {
     totalFrames: 562,
-    totalTime: 5,
+    totalTime: 3,
     images: [],
     currentFrame: 0,
     currentImage: (index) => `./images/TestVideoFrames/2022-06-12 22-39-07converted${index.toString().padStart(3, "0")}.jpg`
   }
 
-  for (let i = 0; i <= demoVideo1Info.totalFrames; i++) {
-    const img = new Image();
-    img.src = require(`${demoVideo1Info.currentImage(i)}`);
-    demoVideo1Info.images.push(img)
-  }
-
-  for (let i = 0; i <= demoVideo2Info.totalFrames; i++) {
-    const img = new Image();
-    img.src = require(`${demoVideo2Info.currentImage(i)}`);
-    demoVideo2Info.images.push(img)
-  }
-  
   const demoVideo1 = useRef([])
   const demoVideo2 = useRef([])
-  
+
   useEffect(() => {
-    demoVideo1.current.width = window.screen.width;
-    demoVideo1.current.height = window.screen.height;
-    gsap.to(demoVideo1Info, {
-      currentFrame: demoVideo1Info.totalFrames,
-      snap: "currentFrame",
-      ease: "none",
-      scrollTrigger: {
-        trigger: demoVideo1.current,
-        start: "top",
-        end: `bottom+=${demoVideo1Info.totalFrames*demoVideo1Info.totalTime}`,
-        scrub: true,
-        pin: true,
-      },
-      onUpdate: renderDemoVideo1
-    })
-
-    demoVideo1Info.images[0].onload = () => {
-      const demoVideo1Context = demoVideo1.current.getContext("2d");
-      demoVideo1Context.drawImage(demoVideo1Info.images[0], 0, 0)
-    }
-
-    demoVideo2.current.width = window.screen.width;
-    demoVideo2.current.height = window.screen.height;
-    gsap.to(demoVideo2Info, {
-      currentFrame: demoVideo2Info.totalFrames,
-      snap: "currentFrame",
-      ease: "none",
-      scrollTrigger: {
-        trigger: demoVideo2.current,
-        start: "top",
-        end: `bottom+=${demoVideo2Info.totalFrames*demoVideo2Info.totalTime}`,
-        scrub: true,
-        pin: true,
-      },
-      onUpdate: renderDemoVideo2
-    })
-
-    demoVideo2Info.images[0].onload = () => {
-      const demoVideo2Context = demoVideo2.current.getContext("2d");
-      demoVideo2Context.drawImage(demoVideo2Info.images[0], 0, 0)
-    }
+    animateOnScroll(demoVideo1, demoVideo1Info)
+    animateOnScroll(demoVideo2, demoVideo2Info)
   })
 
-  const renderDemoVideo1 = () => {
-    const demoVideo1Context = demoVideo1.current.getContext("2d");
-    demoVideo1Context.drawImage(demoVideo1Info.images[demoVideo1Info.currentFrame], 0, 0)
-  }
+  const animateOnScroll = (canvasID, videoInfo) => {
+    const demoVideoContext = canvasID.current.getContext("2d");
 
-  const renderDemoVideo2 = () => {
-    const demoVideo2Context = demoVideo2.current.getContext("2d");
-    demoVideo2Context.drawImage(demoVideo2Info.images[demoVideo2Info.currentFrame], 0, 0)
+    for (let i = 0; i <= videoInfo.totalFrames; i++) {
+      const img = new Image();
+      img.src = require(`${videoInfo.currentImage(i)}`);
+      videoInfo.images.push(img)
+    }
+
+    const renderDemoVideo = () => {
+      demoVideoContext.drawImage(videoInfo.images[videoInfo.currentFrame], 0, 0)
+    }
+
+    videoInfo.images[0].onload = () => {
+      demoVideoContext.drawImage(videoInfo.images[0], 0, 0)
+    }
+
+    canvasID.current.width = window.screen.width;
+    canvasID.current.height = window.screen.height;
+
+    gsap.to(videoInfo, {
+      currentFrame: videoInfo.totalFrames,
+      snap: "currentFrame",
+      ease: "none",
+      scrollTrigger: {
+        trigger: canvasID.current,
+        start: "top",
+        end: `bottom+=${videoInfo.totalFrames * videoInfo.totalTime}`,
+        scrub: true,
+        pin: true,
+      },
+      onUpdate: renderDemoVideo
+    })
   }
 
   return (
