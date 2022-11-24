@@ -1,31 +1,95 @@
+import { gsap, Power0 } from 'gsap';
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useEffect, useRef } from 'react';
 import './App.css';
+gsap.registerPlugin(ScrollTrigger);
 
 function App() {
-
-  const demoVideo1 = useRef([])
   
-  useEffect(() => {
-    const demoVideo1Context = demoVideo1.current.getContext("2d");
-    demoVideo1.current.style.height = "100vh"
-    demoVideo1.current.style.width = "100vw"
-    img.onLoad = () => {
-      demoVideo1Context.drawImage(img, 0, 0)
-    }
-    console.log(img)
-  })
-
   const demoVideo1Info = {
     totalFrames: 440,
-    totalTime: 7,
+    totalTime: 3,
     images: [],
     currentFrame: 0,
     currentImage: (index) => `./images/Dognut/Dognut${index.toString().padStart(3, "0")}.jpg`
   }
 
-  const img = new Image();
-  img.src = require(`${demoVideo1Info.currentImage(0)}`);
-  console.log(img.src)
+  const demoVideo2Info = {
+    totalFrames: 562,
+    totalTime: 5,
+    images: [],
+    currentFrame: 0,
+    currentImage: (index) => `./images/TestVideoFrames/2022-06-12 22-39-07converted${index.toString().padStart(3, "0")}.jpg`
+  }
+
+  for (let i = 0; i <= demoVideo1Info.totalFrames; i++) {
+    const img = new Image();
+    img.src = require(`${demoVideo1Info.currentImage(i)}`);
+    demoVideo1Info.images.push(img)
+  }
+
+  for (let i = 0; i <= demoVideo2Info.totalFrames; i++) {
+    const img = new Image();
+    img.src = require(`${demoVideo2Info.currentImage(i)}`);
+    demoVideo2Info.images.push(img)
+  }
+  
+  const demoVideo1 = useRef([])
+  const demoVideo2 = useRef([])
+  
+  useEffect(() => {
+    demoVideo1.current.width = window.screen.width;
+    demoVideo1.current.height = window.screen.height;
+    gsap.to(demoVideo1Info, {
+      currentFrame: demoVideo1Info.totalFrames,
+      snap: "currentFrame",
+      ease: "none",
+      scrollTrigger: {
+        trigger: demoVideo1.current,
+        start: "top",
+        end: `bottom+=${demoVideo1Info.totalFrames*demoVideo1Info.totalTime}`,
+        scrub: true,
+        pin: true,
+      },
+      onUpdate: renderDemoVideo1
+    })
+
+    demoVideo1Info.images[0].onload = () => {
+      const demoVideo1Context = demoVideo1.current.getContext("2d");
+      demoVideo1Context.drawImage(demoVideo1Info.images[0], 0, 0)
+    }
+
+    demoVideo2.current.width = window.screen.width;
+    demoVideo2.current.height = window.screen.height;
+    gsap.to(demoVideo2Info, {
+      currentFrame: demoVideo2Info.totalFrames,
+      snap: "currentFrame",
+      ease: "none",
+      scrollTrigger: {
+        trigger: demoVideo2.current,
+        start: "top",
+        end: `bottom+=${demoVideo2Info.totalFrames*demoVideo2Info.totalTime}`,
+        scrub: true,
+        pin: true,
+      },
+      onUpdate: renderDemoVideo2
+    })
+
+    demoVideo2Info.images[0].onload = () => {
+      const demoVideo2Context = demoVideo2.current.getContext("2d");
+      demoVideo2Context.drawImage(demoVideo2Info.images[0], 0, 0)
+    }
+  })
+
+  const renderDemoVideo1 = () => {
+    const demoVideo1Context = demoVideo1.current.getContext("2d");
+    demoVideo1Context.drawImage(demoVideo1Info.images[demoVideo1Info.currentFrame], 0, 0)
+  }
+
+  const renderDemoVideo2 = () => {
+    const demoVideo2Context = demoVideo2.current.getContext("2d");
+    demoVideo2Context.drawImage(demoVideo2Info.images[demoVideo2Info.currentFrame], 0, 0)
+  }
 
   return (
     <div className="App">
@@ -60,6 +124,7 @@ function App() {
           <span>Scroll Down for demo bro 👇</span>
         </div>
         <canvas
+          ref={demoVideo2}
           className="info"
           id="demo_video2"
           style={{ backgroundColor: "RoyalBlue" }}
